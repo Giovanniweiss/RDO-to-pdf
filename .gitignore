@@ -29,7 +29,8 @@ old/
 logs/
 html/
 test_files/
-
+processing_logs/
+main_code_logs/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

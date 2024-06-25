@@ -1,4 +1,4 @@
-import logging, sys
+import logging, sys, os
 
 def logger_setup(logging_filename):
     logging.basicConfig(
@@ -11,9 +11,10 @@ def exception_handler(exc_type, exc_value, exc_traceback):
     """Handler for uncaught exceptions."""
     logging.exception("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
 
-def close_log_handlers():
-    logger = logging.getLogger()
+def close_log_handlers(logger_name=""):
+    logger = logging.getLogger(logger_name)
     handlers = logger.handlers[:]
     for handler in handlers:
         handler.close()
         logger.removeHandler(handler)
+

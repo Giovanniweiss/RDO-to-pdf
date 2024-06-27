@@ -21,7 +21,10 @@ def generate_pdf_file(current_time, current_date, css_content, registry_file, da
     logging.debug(f"determinado onde salvar: {save_path}")
     title = "Processamento de RDO"
     msg = f"Processando RDO {nome_do_arquivo}."
-    balloon_tip(title, msg)
+    try:
+        balloon_tip(title, msg)
+    except:
+        logging.debug("did not create new balloon tip as to not bug the code.")
     export_to_pdf(css_content, clean_html, nome_do_arquivo, save_path)
     mensagem_sucesso = f"PDF salvo como {nome_do_arquivo} em {save_path}"
     logging.debug(mensagem_sucesso)

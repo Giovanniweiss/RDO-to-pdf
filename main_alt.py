@@ -2,6 +2,7 @@ import logger_tools_improved as lti
 import load_email as le
 import transform_pdf as pp2
 import datetime, logging, sys, os
+import email_tools as et
 from dotenv import load_dotenv
 
 @lti.prepare_process_logger
@@ -21,8 +22,9 @@ def some_process_module():
     pass
 
 def main():
-    lti.prepare_general_logger()
     load_dotenv()
+    lti.prepare_general_logger()
+    et.run_email_server()
     some_process_module()
     pass
 

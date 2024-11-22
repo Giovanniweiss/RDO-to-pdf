@@ -3,7 +3,6 @@ import weasyprint, datetime
 import re, os, sys, glob, logging
 from balloontip import balloon_tip
 from bs4 import BeautifulSoup
-import load_email as le
 
 # Main function
 def generate_pdf_file(current_time, current_date, css_content, registry_file, data_url):
@@ -126,7 +125,7 @@ def create_filename(html_file):
 
     execution_date = extract_variable_content(html_file, "Quando (previsto)")
     if execution_date == None:
-        execution_date = "date_indeterminada"
+        return "_".join([location, "date_indeterminada"]) + ".pdf"
     else:
         clean_execution_date = execution_date.replace('\n', '').strip()
         clean_execution_date = clean_execution_date.replace('\t', '_')
@@ -139,8 +138,10 @@ def create_filename(html_file):
         clean_execution_date[0] = clean_execution_date[0].split("-")
         clean_execution_date[0] = "-".join([clean_execution_date[0][2], clean_execution_date[0][1], clean_execution_date[0][0]])
         clean_execution_date = "_".join(clean_execution_date)
-        
-    return "_".join([location, clean_execution_date]) + ".pdf"
+
+        clean_location = location.replace("\\", "_")
+        clean_location = clean_location.replace('/', '_')
+        return "_".join([clean_location, clean_execution_date]) + ".pdf"
 
 
 def get_sell_number(filename):
@@ -200,6 +201,9 @@ def export_to_pdf(css_content, response, nome_do_arquivo, save_path):
     css = weasyprint.CSS(string=css_content)
     digit = 1
     file_to_create = os.path.join(save_path, nome_do_arquivo)
+    if len(file_to_create) > 255:
+        new_save_path = os.getenv("STD_SAVE_PATH")
+        file_to_create = os.path.join(new_save_path, nome_do_arquivo)
     if os.path.isfile(file_to_create):
         file_to_create_offset = file_to_create[:-4] + "_" + str(digit) + ".pdf"
         while os.path.isfile(file_to_create_offset):

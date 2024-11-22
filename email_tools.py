@@ -5,6 +5,7 @@ import logging
 import os
 import signal
 import sys
+import logger_tools_improved as lti
 from dotenv import load_dotenv
 
 # Load configuration from .env file
@@ -66,7 +67,4 @@ def check_for_emails(email_processing_function, server, email, password, folder=
 
     except Exception as e:
         logging.error(f"An error occurred: {e}")
-
-def your_custom_function(subject, from_address, to_address, body, html):
-    logging.info("Custom function executed")
 

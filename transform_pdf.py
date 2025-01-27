@@ -47,6 +47,8 @@ def generate_pdf_file(current_time:str, current_date:str, css_content:str, regis
     logging.debug(mensagem_sucesso)
     update_registry(registry_file, current_date, save_path, nome_do_arquivo)
 
+    return 0
+
 
 # This updates a sort of log file to keep track of what has been processed.
 # Could also work with a SQLite I suppose.
@@ -153,6 +155,8 @@ def update_html_content(html_content, url):
 
 
 def create_filename(html_file):
+    """Extracts from the HTML file the location and execution date and assembles a filename out of them.
+    Appropriately gives an alternate name in case these are not found."""
     location = extract_variable_content(html_file, "Onde")
     if location == None:
         location = "local_indeterminado"
@@ -174,26 +178,32 @@ def create_filename(html_file):
         clean_execution_date[0] = clean_execution_date[0].split("-")
         clean_execution_date[0] = "-".join([clean_execution_date[0][2], clean_execution_date[0][1], clean_execution_date[0][0]])
         clean_execution_date = "_".join(clean_execution_date)
+        # There are some redundancies here. Could make this simpler.
+        filename = remove_illegal_symbols("_".join([location, clean_execution_date])) + ".pdf"
+        return filename
 
-        clean_location = location.replace("\\", "_")
-        clean_location = clean_location.replace('/', '_')
-        return "_".join([clean_location, clean_execution_date]) + ".pdf"
+
+def remove_illegal_symbols(input:str):
+    """Removes from the input string symbols that are forbidden to filenames in Windows (><:"/\|?*)"""
+    illegal_symbols = [">", "<", ":", '"', "/", "\\", "|", "?", "*"]
+    for symbol in illegal_symbols:
+        input.replace(symbol, "-")
+    return input
 
 
-def get_sell_number(filename):
+def get_sell_number(filename:str):
+    """Locates a matching pattern in the filename."""
     pattern = r'\b\d{7}\b'
     matches = re.findall(pattern, filename)
 
-    if len(matches) > 1:
+    if len(matches) >= 1:
         return str(matches[-1])
-    elif len(matches) == 1:
-        return str(matches[0])
     else:
         return "SEM CODIGO DE VENDA"
     
 
 def listar_desenhos(acervo, types = (r'\*.pdf')):
-    # Lista todos os arquivos na pasta escolhida dos tipos escolhidos.
+    """Lista todos os arquivos na pasta escolhida dos tipos escolhidos."""
     files_grabbed = []
     for files in types:
         files_grabbed.extend(glob.glob(acervo + files, recursive=True))
@@ -201,6 +211,8 @@ def listar_desenhos(acervo, types = (r'\*.pdf')):
 
 
 def get_where_to_save(sell_number):
+    """Scans the directory looking for the appropriate folder for the project being handled."""
+    # This works fine, but feels very hastily put together.
     current_year = int(datetime.datetime.now().strftime("%Y"))
     
     path = os.getenv("DOCS_PATH", "")
@@ -223,6 +235,7 @@ def get_where_to_save(sell_number):
 
 
 def create_folder_if_none_exists(path):
+    """Creates a folder in path. If it already exists, just skip."""
     if not os.path.exists(path):
         os.makedirs(path)
         print(f"Pasta '{path}' criada com sucesso.")
@@ -232,7 +245,15 @@ def create_folder_if_none_exists(path):
 
 
 # Export the PDF file
-def export_to_pdf(css_content, response, nome_do_arquivo, save_path):
+def export_to_pdf(css_content:str, response:str, nome_do_arquivo:str, save_path:str):
+    """Exports the HTML file, contained in response, to a PDF file, using weasyprint.
+
+    Args:
+        css_content (str): css content for the formatting.
+        response (str): HTML file containing the PDF content.
+        nome_do_arquivo (str): this containg the filename.
+        save_path (str): path wherein to save the file.
+    """    
     create_folder_if_none_exists(save_path)
     doc = weasyprint.HTML(string=str(response), media_type="screen")
     css = weasyprint.CSS(string=css_content)
